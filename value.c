@@ -101,16 +101,19 @@ void build_topo(Value **topo, Value *v, int *topo_size) {
       }
     }
     topo[(*topo_size)++] = v;
-    v->visited = false;
   }
 }
 
-void backprop(Value *self) {
+void backward(Value *self) {
   Value *topo[1000];
   int topo_size = 0;
   build_topo(topo, self, &topo_size);
 
   for (int i = topo_size - 1; i >= 0; i--) {
+    if (i == topo_size - 1) {
+      topo[i]->grad = 1.0;
+    }
+    topo[i]->visited = false; // reseting visited status
     topo[i]->_backward(topo[i]);
   }
 }

@@ -13,18 +13,7 @@ int main(void) {
   Value *x1w1x2w2 = add_value(x1w1, x2w2);
   Value *n = add_value(x1w1x2w2, b);
   Value *o = tanh_value(n);
-  set_value_grad(o, 1.0);
-  backprop(o);
-  /* backward(o); */
-  /* backward(n); */
-  /* backward(b); */
-  /* backward(x1w1x2w2); */
-  /* backward(x2w2); */
-  /* backward(x1w1); */
-  /* backward(x1); */
-  /* backward(w1); */
-  /* backward(x2); */
-  /* backward(w2); */
+  backward(o);
   printf("x1w1 data: %f\n", get_value_data(x1w1));
   printf("x2w2 data: %f\n", get_value_data(x2w2));
   printf("x1w1x2w2 data: %f\n", get_value_data(x1w1x2w2));
