@@ -22,7 +22,8 @@ Value *create_value(float data) {
   Value *v = (Value *)malloc(sizeof(Value));
   v->data = data;
   v->prev[0] = NULL;
-  v->prev[1] = NULL v->grad = 0.0;
+  v->prev[1] = NULL;
+  v->grad = 0.0;
   v->visited = false;
   v->_backward = default_backward;
   return v;
@@ -62,6 +63,13 @@ void exp_backward(Value *self) {
   self->prev[0]->grad += self->data * self->grad;
 }
 
+void pow_backward(Value *self) {
+  float base = self->prev[0]->data;
+  float exponent = self->prev[1]->data;
+  self->prev[0]->grad += (exponent * pow(base, exponent - 1)) * self->grad;
+  self->prev[1]->grad += ((self->data) * (base)) * self->grad;
+}
+
 Value *add_value(Value *v1, Value *v2) {
   Value *out = init_value(v1->data + v2->data, v1, v2, "+", "");
 
@@ -73,6 +81,13 @@ Value *mult_value(Value *v1, Value *v2) {
   Value *out = init_value(v1->data * v2->data, v1, v2, "*", "");
 
   out->_backward = mult_backward;
+  return out;
+}
+
+Value *pow_value(Value *v1, Value *v2) {
+  Value *out = init_value(pow(v1->data, v2->data), v1, v2, "^", "");
+
+  out->_backward = pow_backward;
   return out;
 }
 
