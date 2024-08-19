@@ -1,5 +1,6 @@
 #include "value.h"
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,10 +12,21 @@ struct _value {
   char op[10];
   float grad;
   char label[50];
+  bool visited;
   void (*_backward)(Value *);
 };
 
 void default_backward(Value *self) { return; }
+
+Value *create_value(float data, char label[50]) {
+  Value *v = (Value *)malloc(sizeof(Value));
+  v->data = data;
+  v->grad = 0.0;
+  v->visited = false;
+  strncpy(v->label, label, 50);
+  v->_backward = default_backward;
+  return v;
+}
 
 Value *init_value(float data, Value *prev1, Value *prev2, char op[10],
                   char label[50]) {
@@ -80,7 +92,28 @@ Value *exp_value(Value *v) {
 
 void print_value(Value *v) { printf("Value(data=%f)\n", v->data); }
 
-void backward(Value *self) { self->_backward(self); }
+void build_topo(Value **topo, Value *v, int *topo_size) {
+  if (!(v->visited)) {
+    v->visited = true;
+    for (int i = 0; i < 2; i++) {
+      if (v->prev[i] != NULL) {
+        build_topo(topo, v->prev[i], topo_size);
+      }
+    }
+    topo[(*topo_size)++] = v;
+    v->visited = false;
+  }
+}
+
+void backprop(Value *self) {
+  Value *topo[1000];
+  int topo_size = 0;
+  build_topo(topo, self, &topo_size);
+
+  for (int i = topo_size - 1; i >= 0; i--) {
+    topo[i]->_backward(topo[i]);
+  }
+}
 
 void set_value_grad(Value *v, float grad) { v->grad = grad; }
 

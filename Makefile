@@ -1,4 +1,4 @@
-all: value.o main.o
+all: clean value.o main.o
 	gcc value.o main.o -std=c99 -o main -lm 
 
 value.o:
