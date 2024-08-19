@@ -67,7 +67,7 @@ void pow_backward(Value *self) {
   float base = self->prev[0]->data;
   float exponent = self->prev[1]->data;
   self->prev[0]->grad += (exponent * pow(base, exponent - 1)) * self->grad;
-  self->prev[1]->grad += ((self->data) * (base)) * self->grad;
+  self->prev[1]->grad += ((self->data) * log(base)) * self->grad;
 }
 
 Value *add_value(Value *v1, Value *v2) {
