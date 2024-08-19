@@ -18,12 +18,12 @@ struct _value {
 
 void default_backward(Value *self) { return; }
 
-Value *create_value(float data, char label[50]) {
+Value *create_value(float data) {
   Value *v = (Value *)malloc(sizeof(Value));
   v->data = data;
-  v->grad = 0.0;
+  v->prev[0] = NULL;
+  v->prev[1] = NULL v->grad = 0.0;
   v->visited = false;
-  strncpy(v->label, label, 50);
   v->_backward = default_backward;
   return v;
 }
@@ -37,6 +37,7 @@ Value *init_value(float data, Value *prev1, Value *prev2, char op[10],
   v->grad = 0.0f;
   v->prev[0] = prev1;
   v->prev[1] = prev2;
+  v->visited = false;
   strncpy(v->label, label, 50);
   v->_backward = default_backward;
 
@@ -44,21 +45,21 @@ Value *init_value(float data, Value *prev1, Value *prev2, char op[10],
 }
 
 void add_backward(Value *self) {
-  self->prev[0]->grad = 1.0f * self->grad;
-  self->prev[1]->grad = 1.0f * self->grad;
+  self->prev[0]->grad += 1.0f * self->grad;
+  self->prev[1]->grad += 1.0f * self->grad;
 }
 
 void mult_backward(Value *self) {
-  self->prev[0]->grad = self->prev[1]->data * self->grad;
-  self->prev[1]->grad = self->prev[0]->data * self->grad;
+  self->prev[0]->grad += self->prev[1]->data * self->grad;
+  self->prev[1]->grad += self->prev[0]->data * self->grad;
 }
 
 void tanh_backward(Value *self) {
-  self->prev[0]->grad = (1.0 - pow(self->data, 2)) * self->grad;
+  self->prev[0]->grad += (1.0 - pow(self->data, 2)) * self->grad;
 }
 
 void exp_backward(Value *self) {
-  self->prev[0]->grad = self->data * self->grad;
+  self->prev[0]->grad += self->data * self->grad;
 }
 
 Value *add_value(Value *v1, Value *v2) {
@@ -92,22 +93,29 @@ Value *exp_value(Value *v) {
 
 void print_value(Value *v) { printf("Value(data=%f)\n", v->data); }
 
-void build_topo(Value **topo, Value *v, int *topo_size) {
+void build_topo(Value ***topo, Value *v, int *topo_size, int *topo_capacity) {
   if (!(v->visited)) {
     v->visited = true;
     for (int i = 0; i < 2; i++) {
       if (v->prev[i] != NULL) {
-        build_topo(topo, v->prev[i], topo_size);
+        build_topo(topo, v->prev[i], topo_size, topo_capacity);
       }
     }
-    topo[(*topo_size)++] = v;
+
+    if (*topo_size >= *topo_capacity) {
+      *topo_capacity += 1000;
+      *topo = realloc(topo, (*topo_capacity) * sizeof(Value *));
+    }
+
+    (*topo)[(*topo_size)++] = v;
   }
 }
 
 void backward(Value *self) {
-  Value *topo[1000];
+  int topo_capacity = 1000;
+  Value **topo = malloc(topo_capacity * sizeof(Value *));
   int topo_size = 0;
-  build_topo(topo, self, &topo_size);
+  build_topo(&topo, self, &topo_size, &topo_capacity);
 
   for (int i = topo_size - 1; i >= 0; i--) {
     if (i == topo_size - 1) {
@@ -119,6 +127,8 @@ void backward(Value *self) {
 }
 
 void set_value_grad(Value *v, float grad) { v->grad = grad; }
+
+void set_value_label(Value *v, char label[50]) { strncpy(v->label, label, 50); }
 
 float get_value_grad(Value *v) { return v->grad; }
 
