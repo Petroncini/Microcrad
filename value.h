@@ -12,4 +12,7 @@ void set_value_grad(Value *v, float grad);
 float get_value_grad(Value *v);
 Value *tanh_value(Value *v);
 float get_value_data(Value *v);
+Value *div_value(Value *v1, Value *v2);
+Value *sub_value(Value *v1, Value *v2);
+Value *pow_value(Value *v1, Value *v2);
 #endif

@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
 struct _value {
   float data;
@@ -88,6 +87,17 @@ Value *pow_value(Value *v1, Value *v2) {
   Value *out = init_value(pow(v1->data, v2->data), v1, v2, "^", "");
 
   out->_backward = pow_backward;
+  return out;
+}
+
+Value *div_value(Value *v1, Value *v2) {
+  Value *out = mult_value(v1, pow_value(v2, create_value(-1.0)));
+  return out;
+}
+
+Value *sub_value(Value *v1, Value *v2) {
+  Value *aux = create_value(-1.0);
+  Value *out = add_value(v1, mult_value(v2, aux));
   return out;
 }
 

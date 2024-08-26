@@ -1,27 +1,42 @@
+#include "NN.h"
+#include "layer.h"
+#include "neuron.h"
 #include "value.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 int main(void) {
-  Value *x1 = create_value(2.0);
-  Value *w1 = create_value(-3.0);
-  Value *x2 = create_value(0.0);
-  Value *w2 = create_value(1.0);
-  Value *b = create_value(6.8813735870195432);
+  srand(time(NULL));
+  rand();
 
-  Value *x1w1 = mult_value(x1, w1);
-  Value *x2w2 = mult_value(x2, w2);
-  Value *x1w1x2w2 = add_value(x1w1, x2w2);
-  Value *n = add_value(x1w1x2w2, b);
-  Value *o = tanh_value(n);
-  backward(o);
+  int layers[] = {4, 4, 1};
+  NN *net = create_NN(3, layers, 4);
 
-  printf("o grad: %f\n", get_value_grad(o));
-  printf("n grad: %f\n", get_value_grad(n));
-  printf("x1w1x2w2 grad: %f\n", get_value_grad(x1w1x2w2));
-  printf("x1w1 grad: %f\n", get_value_grad(x1w1));
-  printf("x2w2 grad: %f\n", get_value_grad(x2w2));
-  printf("x1 grad: %f\n", get_value_grad(x1));
-  printf("w1 grad: %f\n", get_value_grad(w1));
-  printf("x2 grad: %f\n", get_value_grad(x2));
-  printf("w2 grad: %f\n", get_value_grad(w2));
+  Value *sx[4][3] = {
+      {create_value(2.0), create_value(3.0), create_value(-1.0)},
+      {create_value(3.0), create_value(-1.0), create_value(0.5)},
+      {create_value(0.5), create_value(1.0), create_value(1.0)},
+      {create_value(1.0), create_value(1.0), create_value(-1.0)}};
+
+  Value *ys[] = {create_value(1.0), create_value(-1.0), create_value(-1.0),
+                 create_value(1.0)};
+  Value **ypred[4];
+  for (int i = 0; i < 4; i++) {
+    ypred[i] = call_NN(sx[i], 3, net);
+  }
+
+  for (int i = 0; i < 4; i++) {
+    print_value(ypred[i][0]);
+  }
+
+  Value *loss = create_value(0.0);
+
+  for (int i = 0; i < 4; i++) {
+    loss = add_value(
+        loss, (pow_value(sub_value(ypred[i][0], ys[i]), create_value(2.0))));
+  }
+
+  print_value(loss);
+  backward(loss);
 }
