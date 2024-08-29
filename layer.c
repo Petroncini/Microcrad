@@ -39,3 +39,15 @@ void print_layer(Layer *layer) {
 }
 
 int get_layer_size(Layer *layer) { return layer->nin; }
+
+void layer_update(float lr, Layer *layer) {
+  for (int i = 0; i < layer->nin; i++) {
+    neuron_update(lr, layer->neurons[i]);
+  }
+}
+
+void zero_layer(Layer *layer) {
+  for (int i = 0; i < layer->nin; i++) {
+    zero_neuron(layer->neurons[i]);
+  }
+}

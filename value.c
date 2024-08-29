@@ -137,7 +137,7 @@ void build_topo(Value ***topo, Value *v, int *topo_size, int *topo_capacity) {
 }
 
 void backward(Value *self) {
-  int topo_capacity = 1000;
+  int topo_capacity = 100000;
   Value **topo = malloc(topo_capacity * sizeof(Value *));
   int topo_size = 0;
   build_topo(&topo, self, &topo_size, &topo_capacity);

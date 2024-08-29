@@ -27,6 +27,19 @@ Value *call_neuron(Value **vals, int val_num, Neuron *neuron) {
 }
 
 void print_neuron(Neuron *neuron) {
-  printf("Neuron(w=%f, b=%f)", get_value_data(neuron->w),
-         get_value_data(neuron->b));
+  printf("Neuron(w=%f, b=%f, w grad: %f, b grad: %f)\n",
+         get_value_data(neuron->w), get_value_data(neuron->b),
+         get_value_grad(neuron->w), get_value_grad(neuron->b));
+}
+
+void neuron_update(float lr, Neuron *neuron) {
+  neuron->w =
+      sub_value(neuron->w, create_value(lr * get_value_grad(neuron->w)));
+  neuron->b =
+      sub_value(neuron->b, create_value(lr * get_value_grad(neuron->b)));
+}
+
+void zero_neuron(Neuron *neuron) {
+  set_value_grad(neuron->w, 0.0);
+  set_value_grad(neuron->b, 0.0);
 }
