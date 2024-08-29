@@ -15,4 +15,7 @@ float get_value_data(Value *v);
 Value *div_value(Value *v1, Value *v2);
 Value *sub_value(Value *v1, Value *v2);
 Value *pow_value(Value *v1, Value *v2);
+Value *reLu_value(Value *v);
+Value *sig_value(Value *v);
+Value *binary_cross_entropy(Value *pred, Value *target);
 #endif
